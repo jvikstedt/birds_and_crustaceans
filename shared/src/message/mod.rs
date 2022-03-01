@@ -98,6 +98,13 @@ pub enum ServerMessage {
     HandshakeAccepted,
     ChangeState(ClientState),
     // FrameInfo { frames: Vec<Frame>, frame_diff: i8 },
-    LoadFrames { is_last: bool, frames: Vec<Frame> },
+    LoadingStart {
+        start_frame: FrameNumber,
+        end_frame: FrameNumber,
+    },
+    LoadingEnd {
+        start_frame: FrameNumber,
+        end_frame: FrameNumber,
+    },
     InitialInformation(Information),
 }

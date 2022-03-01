@@ -92,57 +92,39 @@ impl Stage for ServerStage {
                 .expect("ServerResource exists");
 
             let mut frame_info_to_send: Vec<(ConnectionHandle, FrameInfo)> = Vec::new();
-            let mut load_frames_to_send: Vec<(ConnectionHandle, ServerMessage, FrameNumber, bool)> =
+            let mut players_loading_done: Vec<(ConnectionHandle, FrameNumber, FrameNumber)> =
                 Vec::new();
 
             for handle in server_res.connections.keys() {
                 if let Some(player_info) = players.0.get(handle) {
+                    let starts_at = frames.starts_at;
+                    let end_frame = frames.last_confirmed;
                     let frame_diff = player_info.frame_diff.average_i8();
 
-                    if player_info.loading {
-                        let end_frame = if (player_info.last_sent + 10) > frames.last_confirmed {
-                            frames.last_confirmed
-                        } else {
-                            player_info.last_sent + 10
-                        };
-                        let is_last = frames.last_confirmed == end_frame;
-
-                        let frames = frames.get_confirmed_frames_between(
-                            if player_info.last_sent == 0 {
-                                None
-                            } else {
-                                Some(player_info.last_sent)
-                            },
-                            Some(end_frame),
-                        );
-                        let load_frames = ServerMessage::LoadFrames {
-                            frames: frames.to_vec(),
-                            is_last,
-                        };
-
-                        load_frames_to_send.push((*handle, load_frames, end_frame, is_last));
+                    let start_frame = if player_info.last_confirmed_frame == 0 {
+                        starts_at
                     } else {
-                        let start_frame = if player_info.last_confirmed_frame == 0 {
-                            frames.last_confirmed
-                        } else {
-                            player_info.last_confirmed_frame
-                        };
-                        let frames = frames.get_confirmed_frames_between(Some(start_frame), None);
-                        let frame_info = FrameInfo {
-                            frames: frames.to_vec(),
-                            frame_diff,
-                        };
+                        player_info.last_confirmed_frame
+                    };
 
-                        frame_info_to_send.push((*handle, frame_info));
+                    let last_frame = if start_frame + 50 <= end_frame {
+                        start_frame + 50
+                    } else {
+                        end_frame
+                    };
+
+                    let frames =
+                        frames.get_confirmed_frames_between(Some(start_frame), Some(last_frame));
+                    let frame_info = FrameInfo {
+                        frames: frames.to_vec(),
+                        frame_diff,
+                    };
+
+                    frame_info_to_send.push((*handle, frame_info));
+
+                    if player_info.loading && (end_frame - player_info.last_confirmed_frame) < 20 {
+                        players_loading_done.push((*handle, starts_at, end_frame));
                     }
-                }
-            }
-
-            let mut players = world.get_resource_mut::<Players>().expect("Players exists");
-            for (handle, _, end_frame, is_last) in load_frames_to_send.iter() {
-                if let Some(mut player_info) = players.0.get_mut(handle) {
-                    player_info.loading = !is_last;
-                    player_info.last_sent = *end_frame;
                 }
             }
 
@@ -156,10 +138,24 @@ impl Stage for ServerStage {
                     .expect("should be able to send frame info");
             }
 
-            for (handle, packet, _, _) in load_frames_to_send {
+            for (handle, start_frame, end_frame) in players_loading_done.iter() {
                 server_res
-                    .send_message(handle, packet)
-                    .expect("should be able to send load frames");
+                    .send_message(
+                        *handle,
+                        ServerMessage::LoadingEnd {
+                            start_frame: *start_frame,
+                            end_frame: *end_frame,
+                        },
+                    )
+                    .expect("should be able to loading end");
+            }
+
+            let mut players = world.get_resource_mut::<Players>().expect("Players exists");
+
+            for (handle, _, _) in players_loading_done {
+                if let Some(mut player_info) = players.0.get_mut(&handle) {
+                    player_info.loading = false;
+                }
             }
 
             // Move to next frame

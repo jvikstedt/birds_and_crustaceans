@@ -1,8 +1,6 @@
 use bevy::prelude::{error, info, warn, EventReader, ResMut};
 use bevy_networking_turbulence::{ConnectionHandle, NetworkEvent, NetworkResource};
-use shared::message::{
-    ClientMessage, ClientState, FrameInput, Information, ServerMessage, TickInput,
-};
+use shared::message::{ClientMessage, FrameInput, Information, ServerMessage, TickInput};
 
 use crate::resource::{Frames, PlayerHandleProvider, PlayerInfo, Players};
 
@@ -106,8 +104,14 @@ pub fn handle_server_events(
                 info!("connected {:?} with handle {:?}", handle, player_handle);
 
                 // Command client to change state to loading
-                net.send_message(*handle, ServerMessage::ChangeState(ClientState::Loading))
-                    .expect("should be able to change state to loading event");
+                net.send_message(
+                    *handle,
+                    ServerMessage::LoadingStart {
+                        start_frame: frames.starts_at,
+                        end_frame: frames.last_confirmed,
+                    },
+                )
+                .expect("should be able to change state to loading event");
 
                 // Add new Connection -> PlayerInfo mapping
                 players.0.insert(

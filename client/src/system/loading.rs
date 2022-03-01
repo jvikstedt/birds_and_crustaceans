@@ -1,5 +1,6 @@
 use bevy::prelude::{Commands, ResMut, State};
-use shared::message::ClientState;
+use bevy_networking_turbulence::NetworkResource;
+use shared::message::{ClientState, PlayerInput, TickInput};
 
 use crate::{resource::RemoteFrames, rollback::rollback_stage::StartRollbackStage};
 
@@ -7,6 +8,7 @@ pub fn loading(
     mut commands: Commands,
     mut app_state: ResMut<State<ClientState>>,
     mut remote_frames: ResMut<RemoteFrames>,
+    mut client_res: ResMut<NetworkResource>,
 ) {
     // Sort tmp_frames
     remote_frames.tmp_frames.sort_by_key(|f| f.number);
@@ -67,4 +69,23 @@ pub fn loading(
         app_state.set(ClientState::InGame).unwrap();
         commands.insert_resource(StartRollbackStage::new(prev_number));
     }
+
+    let server_handle = *client_res.connections.keys().last().unwrap();
+
+    let prev_frame_number = if let Some(frame) = remote_frames.frames.last() {
+        frame.number
+    } else {
+        0
+    };
+
+    client_res
+        .send_message(
+            server_handle,
+            TickInput {
+                frame_number: 0,
+                player_input: PlayerInput::default(),
+                last_confirmed_frame: prev_frame_number,
+            },
+        )
+        .expect("should be able to send handshake");
 }

@@ -18,11 +18,20 @@ pub fn handle_client_events(
                 ServerMessage::ChangeState(state) => {
                     app_state.set(state).unwrap();
                 }
-                ServerMessage::LoadFrames { frames, is_last } => {
-                    for frame in frames {
-                        remote_frames.tmp_frames.push(frame);
-                    }
-                    remote_frames.loading_done = is_last;
+                ServerMessage::LoadingStart {
+                    start_frame,
+                    end_frame,
+                } => {
+                    info!("loading start: {} - {}", start_frame, end_frame);
+                    *remote_frames = RemoteFrames::new(start_frame);
+                    app_state.set(ClientState::Loading).unwrap();
+                }
+                ServerMessage::LoadingEnd {
+                    start_frame,
+                    end_frame,
+                } => {
+                    info!("loading end: {} - {}", start_frame, end_frame);
+                    remote_frames.loading_done = true;
                 }
                 ServerMessage::InitialInformation(information) => {
                     commands.insert_resource(information);
@@ -35,7 +44,13 @@ pub fn handle_client_events(
             remote_frames.remote_frame_diff = frame_info.frame_diff;
 
             for frame in frame_info.frames {
-                remote_frames.tmp_frames.push(frame);
+                if !remote_frames
+                    .tmp_frames
+                    .iter()
+                    .any(|f| f.number == frame.number)
+                {
+                    remote_frames.tmp_frames.push(frame);
+                }
             }
         }
     }

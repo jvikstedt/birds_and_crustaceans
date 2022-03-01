@@ -130,7 +130,9 @@ impl Stage for RollbackStage {
         self.advance_confirmed_frames(world);
 
         // Change speed depending frame diff with the server
-        if remote_frame_diff > -1 {
+        if remote_frame_diff > 3 {
+            self.run_speed = 0.2; // Speed up
+        } else if remote_frame_diff > -1 {
             self.run_speed = 0.9; // Speed up
         } else if remote_frame_diff < -3 {
             self.run_speed = 1.1; // Slow down
