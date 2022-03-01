@@ -120,7 +120,8 @@ fn main() {
                     .with_system_set(
                         SystemSet::new()
                             .with_system(system::update_inputs.label(SYSTEM_LABEL_UPDATE_INPUTS))
-                            .with_system(system::apply_inputs.after(SYSTEM_LABEL_UPDATE_INPUTS)),
+                            .with_system(system::apply_inputs.after(SYSTEM_LABEL_UPDATE_INPUTS))
+                            .with_system(system::hit.after(SYSTEM_LABEL_UPDATE_INPUTS)),
                     ),
             )
             .with_stage(
@@ -134,6 +135,7 @@ fn main() {
                     .with_system_set(
                         SystemSet::new()
                             .after(SYSTEM_LABEL_COLLISION)
+                            .with_system(system::handle_hits)
                             .with_system(system::update_position_history),
                     ),
             )

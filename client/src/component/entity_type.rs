@@ -5,4 +5,5 @@ use bevy::prelude::Component;
 pub enum EntityType {
     Player,
     Enemy,
+    Hit,
 }
