@@ -5,6 +5,7 @@ mod opt;
 mod random;
 mod remote_frames;
 mod render_info;
+mod scores;
 
 pub use frame_info::FrameInfo;
 pub use mouse_info::MouseInfo;
@@ -13,3 +14,4 @@ pub use opt::Opt;
 pub use random::Random;
 pub use remote_frames::RemoteFrames;
 pub use render_info::RenderInfo;
+pub use scores::Scores;

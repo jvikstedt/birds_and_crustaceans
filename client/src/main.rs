@@ -6,7 +6,7 @@ use bevy_networking_turbulence::{LinkConditionerConfig, NetworkingPlugin};
 use component::{Checksum, Collider, Health, PositionHistory};
 use event::CollisionEvent;
 use menu::MenuPlugin;
-use resource::{FrameInfo, MouseInfo, NetworkIdProvider, Opt, RemoteFrames};
+use resource::{FrameInfo, MouseInfo, NetworkIdProvider, Opt, RemoteFrames, Scores};
 use shared::message::{ClientState, Frame, PlayerInput};
 use structopt::StructOpt;
 
@@ -75,6 +75,7 @@ fn main() {
     .init_resource::<Events<CollisionEvent>>()
     .insert_resource(opt)
     .insert_resource(RemoteFrames::new(1))
+    .insert_resource(Scores::new())
     .insert_resource(MouseInfo::default())
     .insert_rollback_resource(NetworkIdProvider::default())
     .add_plugin(NetworkingPlugin {
@@ -100,6 +101,12 @@ fn main() {
             .with_system(system::ai::spawn_enemy.after(SYSTEM_LABEL_BUILD_MAP)),
     )
     .add_system_set(SystemSet::on_update(ClientState::Loading).with_system(system::loading))
+    .add_system_set(
+        SystemSet::on_enter(ClientState::InGame).with_system(system::setup_score_window),
+    )
+    .add_system_set(
+        SystemSet::on_update(ClientState::InGame).with_system(system::update_score_window),
+    )
     .with_input_system(system::input)
     .with_rollback_schedule(
         Schedule::default()
