@@ -32,6 +32,7 @@ const STAGE_EVERY_DEFAULT: &str = "every_default";
 
 const SYSTEM_LABEL_COLLISION: &str = "collision";
 const SYSTEM_LABEL_SPAWN: &str = "spawn";
+const SYSTEM_LABEL_SPAWN_PLAYERS: &str = "spawn_players";
 const SYSTEM_LABEL_BUILD_MAP: &str = "build_map";
 
 const SYSTEM_LABEL_UPDATE_INPUTS: &str = "update_inputs";
@@ -100,10 +101,6 @@ fn main() {
             .with_system(system::audio::setup_audio_handles)
             .with_system(system::build_map.label(SYSTEM_LABEL_BUILD_MAP)),
     )
-    .add_system_set(
-        SystemSet::on_enter(ClientState::Loading)
-            .with_system(system::ai::spawn_enemy.after(SYSTEM_LABEL_BUILD_MAP)),
-    )
     .add_system_set(SystemSet::on_update(ClientState::Loading).with_system(system::loading))
     .add_system_set(
         SystemSet::on_enter(ClientState::InGame).with_system(system::audio::start_background_audio),
@@ -123,8 +120,9 @@ fn main() {
                     SystemSet::new()
                         .label(SYSTEM_LABEL_SPAWN)
                         .with_run_criteria(run_if_confirmed)
-                        .with_system(system::spawn_players)
-                        .with_system(system::despawn_players),
+                        .with_system(system::spawn_players.label(SYSTEM_LABEL_SPAWN_PLAYERS))
+                        .with_system(system::despawn_players)
+                        .with_system(system::ai::spawn_enemy.after(SYSTEM_LABEL_SPAWN_PLAYERS)),
                 ),
             )
             .with_stage(

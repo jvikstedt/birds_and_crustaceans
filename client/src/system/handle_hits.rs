@@ -1,7 +1,7 @@
 use bevy::prelude::{Entity, EventReader, Query, Res, ResMut};
 
 use crate::{
-    component::{EntityType, Health, Hit, Player},
+    component::{EntityType, Health, Hit, Player, ScoreReward},
     event::CollisionEvent,
     resource::{FrameInfo, Scores},
 };
@@ -9,7 +9,7 @@ use crate::{
 pub fn handle_hits(
     mut collision_ev: EventReader<CollisionEvent>,
     frame_info: Res<FrameInfo>,
-    mut health_q: Query<(Entity, &mut Health)>,
+    mut health_q: Query<(Entity, &mut Health, &ScoreReward)>,
     melee_hit_q: Query<(Entity, &Hit)>,
     mut scores: ResMut<Scores>,
     players_q: Query<(Entity, &Player)>,
@@ -23,12 +23,12 @@ pub fn handle_hits(
                     continue;
                 }
 
-                if let Ok((_, mut health)) = health_q.get_mut(c.target) {
+                if let Ok((_, mut health, score_reward)) = health_q.get_mut(c.target) {
                     health.current -= hit.damage;
 
                     if health.current <= 0 {
                         if let Ok(parent_player) = players_q.get(hit.parent) {
-                            scores.add_score(parent_player.1.handle, 10);
+                            scores.add_score(parent_player.1.handle, score_reward.score);
                         }
                     }
                 }

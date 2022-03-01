@@ -2,7 +2,7 @@
 use shared::PlayerHandle;
 use std::collections::HashMap;
 
-pub type ScoreStat = u32;
+pub type ScoreStat = i32;
 
 pub struct Scores {
     pub scores: HashMap<PlayerHandle, ScoreStat>,

@@ -13,6 +13,7 @@ mod myself;
 mod network_entity;
 mod player;
 mod position_history;
+mod score_reward;
 mod score_window;
 mod solid;
 
@@ -29,5 +30,6 @@ pub use myself::Myself;
 pub use network_entity::NetworkEntity;
 pub use player::Player;
 pub use position_history::PositionHistory;
+pub use score_reward::ScoreReward;
 pub use score_window::ScoreWindow;
 pub use solid::Solid;
