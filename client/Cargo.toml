@@ -1,0 +1,25 @@
+[package]
+name = "client"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy = "0.6"
+shared = { path = "../shared" }
+rand = "0.8"
+instant = "0.1"
+structopt = { version = "0.3", default-features = false }
+bevy-inspector-egui = { version = "0.7", optional = true }
+serde = "1.0"
+serde_json = "1.0"
+glam = { version = "0.20", default-features = false, features = ["libm"] }
+num-traits = { version = "0.2", default-features = false, features = ["libm"] }
+sha2 = "0.10"
+base64 = "0.13"
+bevy_networking_turbulence = { version = "0.4", default-features = false, features = ["use-webrtc"] }
+cfg-if = "1.0"
+
+[features]
+inspectable = ["bevy-inspector-egui"]
