@@ -1,6 +1,6 @@
 use bevy::{
     math::Vec2,
-    prelude::{info, Color, Commands, Res, ResMut, SpriteBundle, Transform, Visibility},
+    prelude::{info, AssetServer, Commands, Res, ResMut, SpriteBundle, Transform, Visibility},
     sprite::Sprite,
 };
 use glam::Vec3;
@@ -25,14 +25,15 @@ pub fn spawn_players(
     mut nip: ResMut<NetworkIdProvider>,
     information: Res<Information>,
     opt: Res<Opt>,
+    asset_server: Res<AssetServer>,
 ) {
     for player_handle in frame.joined_players.iter() {
         info!("creating player: {:?}", player_handle);
 
         let myself = information.player_handle == *player_handle;
 
-        let width = 5.;
-        let height = 5.;
+        let width = 29.;
+        let height = 24.;
 
         let next_id = rip.next_id();
 
@@ -42,8 +43,8 @@ pub fn spawn_players(
 
         entity_commands
             .insert_bundle(SpriteBundle {
+                texture: asset_server.load("pointer.png"),
                 sprite: Sprite {
-                    color: Color::rgb(1., 0.5, 1.0),
                     custom_size: Some(Vec2::new(width, height)),
                     ..Default::default()
                 },
