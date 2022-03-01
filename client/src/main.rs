@@ -83,6 +83,7 @@ fn main() {
         } else {
             None
         },
+        idle_timeout_ms: Some(10000),
         ..Default::default()
     })
     .add_plugin(FrameTimeDiagnosticsPlugin::default())
