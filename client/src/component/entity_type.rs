@@ -6,4 +6,5 @@ pub enum EntityType {
     Player,
     Enemy,
     Hit,
+    Wall,
 }
