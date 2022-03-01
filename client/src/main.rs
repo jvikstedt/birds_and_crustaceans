@@ -2,11 +2,12 @@ use bevy::{
     app::Events, core::FixedTimestep, diagnostic::FrameTimeDiagnosticsPlugin,
     ecs::schedule::ShouldRun, prelude::*,
 };
+use bevy_kira_audio::AudioPlugin;
 use bevy_networking_turbulence::{LinkConditionerConfig, NetworkingPlugin};
 use component::{Checksum, Collider, Health, PositionHistory};
 use event::CollisionEvent;
 use menu::MenuPlugin;
-use resource::{FrameInfo, MouseInfo, NetworkIdProvider, Opt, RemoteFrames, Scores};
+use resource::{AudioHandles, FrameInfo, MouseInfo, NetworkIdProvider, Opt, RemoteFrames, Scores};
 use shared::message::{ClientState, Frame, PlayerInput};
 use structopt::StructOpt;
 
@@ -67,6 +68,7 @@ fn main() {
     .add_plugins(DefaultPlugins)
     .add_plugin(RollbackPlugin::new(opt.input_lag))
     .add_plugin(MenuPlugin::new())
+    .add_plugin(AudioPlugin)
     .register_rollback_type::<PlayerInput>()
     .register_rollback_type::<Collider>()
     .register_rollback_type::<PositionHistory>()
@@ -77,6 +79,7 @@ fn main() {
     .insert_resource(RemoteFrames::new(1))
     .insert_resource(Scores::new())
     .insert_resource(MouseInfo::default())
+    .insert_resource(AudioHandles::default())
     .insert_rollback_resource(NetworkIdProvider::default())
     .add_plugin(NetworkingPlugin {
         link_conditioner: if cfg!(debug_assertions) {
@@ -94,6 +97,7 @@ fn main() {
     .add_system_set(SystemSet::on_enter(ClientState::Connecting).with_system(system::setup_client))
     .add_system_set(
         SystemSet::on_enter(ClientState::Loading)
+            .with_system(system::audio::setup_audio_handles)
             .with_system(system::build_map.label(SYSTEM_LABEL_BUILD_MAP)),
     )
     .add_system_set(
@@ -101,6 +105,9 @@ fn main() {
             .with_system(system::ai::spawn_enemy.after(SYSTEM_LABEL_BUILD_MAP)),
     )
     .add_system_set(SystemSet::on_update(ClientState::Loading).with_system(system::loading))
+    .add_system_set(
+        SystemSet::on_enter(ClientState::InGame).with_system(system::audio::start_background_audio),
+    )
     .add_system_set(
         SystemSet::on_enter(ClientState::InGame).with_system(system::setup_score_window),
     )

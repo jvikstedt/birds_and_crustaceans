@@ -18,6 +18,7 @@ glam = { version = "0.20", default-features = false, features = ["libm"] }
 num-traits = { version = "0.2", default-features = false, features = ["libm"] }
 sha2 = "0.10"
 base64 = "0.13"
+bevy_kira_audio = { version = "0.8", default-features = false, features = ["ogg"] }
 bevy_networking_turbulence = { version = "0.4", default-features = false, features = ["use-webrtc"] }
 cfg-if = "1.0"
 

@@ -1,3 +1,4 @@
+mod audio_handles;
 mod frame_info;
 mod mouse_info;
 mod network_id_provider;
@@ -7,6 +8,7 @@ mod remote_frames;
 mod render_info;
 mod scores;
 
+pub use audio_handles::AudioHandles;
 pub use frame_info::FrameInfo;
 pub use mouse_info::MouseInfo;
 pub use network_id_provider::NetworkIdProvider;

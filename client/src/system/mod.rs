@@ -1,5 +1,6 @@
 pub mod ai;
 mod apply_inputs;
+pub mod audio;
 mod build_map;
 mod calculate_checksum;
 mod check_collision;
