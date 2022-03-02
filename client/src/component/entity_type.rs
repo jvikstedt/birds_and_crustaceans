@@ -7,4 +7,5 @@ pub enum EntityType {
     Enemy,
     Hit,
     Wall,
+    Training,
 }

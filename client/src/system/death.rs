@@ -3,12 +3,12 @@ use bevy::{
     sprite::Sprite,
 };
 
-use crate::component::{Dynamic, Enemy, EntityType, Health};
+use crate::component::{Dynamic, EntityType, Health};
 
-pub fn death(mut commands: Commands, health_q: Query<(Entity, &Health, Option<&Enemy>)>) {
-    for (entity, health, enemy) in health_q.iter() {
+pub fn death(mut commands: Commands, mut health_q: Query<(Entity, &mut Health, &EntityType)>) {
+    for (entity, mut health, entity_type) in health_q.iter_mut() {
         if health.current <= 0 {
-            if enemy.is_some() {
+            if let EntityType::Enemy = entity_type {
                 commands
                     .entity(entity)
                     .remove::<EntityType>()
@@ -16,6 +16,8 @@ pub fn death(mut commands: Commands, health_q: Query<(Entity, &Health, Option<&E
                     .remove::<Health>()
                     .remove::<Sprite>()
                     .despawn_descendants();
+            } else if let EntityType::Training = entity_type {
+                health.current = health.max;
             } else {
                 commands.entity(entity).despawn_recursive();
             }

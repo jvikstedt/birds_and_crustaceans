@@ -4,7 +4,8 @@ use bevy::{
 };
 use bevy_kira_audio::AudioPlugin;
 use bevy_networking_turbulence::{LinkConditionerConfig, NetworkingPlugin};
-use component::{Checksum, Collider, Health, PositionHistory};
+use bevy_prototype_lyon::plugin::ShapePlugin;
+use component::{Checksum, Collider, Health, Player, PositionHistory};
 use event::CollisionEvent;
 use menu::MenuPlugin;
 use resource::{AudioHandles, FrameInfo, MouseInfo, NetworkIdProvider, Opt, RemoteFrames, Scores};
@@ -56,19 +57,21 @@ fn main() {
 
     app.insert_resource(WindowDescriptor {
         title: "Birds And Crustaceans - Client".to_string(),
-        width: 800.,
-        height: 600.,
+        width: 1024.,
+        height: 768.,
         ..Default::default()
     })
     .add_plugins(DefaultPlugins)
     .add_plugin(RollbackPlugin::new(opt.input_lag))
     .add_plugin(MenuPlugin::new())
     .add_plugin(AudioPlugin)
+    .add_plugin(ShapePlugin)
     .register_rollback_type::<PlayerInput>()
     .register_rollback_type::<Collider>()
     .register_rollback_type::<PositionHistory>()
     .register_rollback_type::<Health>()
     .register_rollback_type::<Checksum>()
+    .register_rollback_type::<Player>()
     .init_resource::<Events<CollisionEvent>>()
     .insert_resource(opt)
     .insert_resource(RemoteFrames::new(1))
@@ -123,7 +126,10 @@ fn main() {
                                 .label(SYSTEM_LABEL_DESPAWN_PLAYERS)
                                 .after(SYSTEM_LABEL_SPAWN_PLAYERS),
                         )
-                        .with_system(system::ai::spawn_enemy.after(SYSTEM_LABEL_DESPAWN_PLAYERS)),
+                        .with_system(system::ai::spawn_enemy.after(SYSTEM_LABEL_DESPAWN_PLAYERS))
+                        .with_system(
+                            system::update_player_size.after(SYSTEM_LABEL_DESPAWN_PLAYERS),
+                        ),
                 ),
             )
             .with_stage(

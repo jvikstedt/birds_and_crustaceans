@@ -1,7 +1,7 @@
 use bevy::prelude::{Entity, EventReader, Query, Res, ResMut};
 
 use crate::{
-    component::{EntityType, Health, Hit, Player, ScoreReward},
+    component::{EntityType, Health, Hit, Player, ScoreReward, Training},
     event::CollisionEvent,
     resource::{FrameInfo, Scores},
 };
@@ -9,10 +9,10 @@ use crate::{
 pub fn handle_hits(
     mut collision_ev: EventReader<CollisionEvent>,
     frame_info: Res<FrameInfo>,
-    mut health_q: Query<(Entity, &mut Health, &ScoreReward)>,
+    mut health_q: Query<(Entity, &mut Health, Option<&ScoreReward>, Option<&Training>)>,
     melee_hit_q: Query<(Entity, &Hit)>,
     mut scores: ResMut<Scores>,
-    players_q: Query<(Entity, &Player)>,
+    mut players_q: Query<(Entity, &mut Player)>,
 ) {
     if frame_info.confirmed {
         for c in collision_ev.iter() {
@@ -23,12 +23,26 @@ pub fn handle_hits(
                     continue;
                 }
 
-                if let Ok((_, mut health, score_reward)) = health_q.get_mut(c.target) {
+                if let Ok((_, mut health, score_reward, training)) = health_q.get_mut(c.target) {
                     health.current -= hit.damage;
 
                     if health.current <= 0 {
-                        if let Ok(parent_player) = players_q.get(hit.parent) {
-                            scores.add_score(parent_player.1.handle, score_reward.score);
+                        if let Ok(mut parent_player) = players_q.get_mut(hit.parent) {
+                            if let Some(score_reward) = score_reward {
+                                scores.add_score(parent_player.1.handle, score_reward.score);
+                            }
+
+                            if let Some(training) = training {
+                                parent_player.1.damage += training.damage_increase;
+                                parent_player.1.area += training.area_increase;
+
+                                if parent_player.1.damage > 30 {
+                                    parent_player.1.damage = 30;
+                                }
+                                if parent_player.1.area > 60 {
+                                    parent_player.1.area = 60;
+                                }
+                            }
                         }
                     }
                 }

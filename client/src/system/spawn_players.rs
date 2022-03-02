@@ -59,6 +59,8 @@ pub fn spawn_players(
             })
             .insert(Player {
                 handle: *player_handle,
+                damage: 10,
+                area: 29,
             })
             .insert(Dynamic::default())
             .insert(PlayerInput::default())

@@ -19,6 +19,7 @@ num-traits = { version = "0.2", default-features = false, features = ["libm"] }
 bevy_kira_audio = { version = "0.8", default-features = false, features = ["ogg"] }
 bevy_networking_turbulence = { version = "0.4", default-features = false, features = ["use-webrtc"] }
 cfg-if = "1.0"
+bevy_prototype_lyon = "0.4.0"
 
 [features]
 inspectable = ["bevy-inspector-egui"]

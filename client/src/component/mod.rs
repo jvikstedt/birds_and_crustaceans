@@ -18,6 +18,7 @@ mod position_history;
 mod score_reward;
 mod score_window;
 mod solid;
+mod training;
 
 pub use checksum::Checksum;
 pub use collider::Collider;
@@ -37,3 +38,4 @@ pub use position_history::PositionHistory;
 pub use score_reward::ScoreReward;
 pub use score_window::ScoreWindow;
 pub use solid::Solid;
+pub use training::Training;

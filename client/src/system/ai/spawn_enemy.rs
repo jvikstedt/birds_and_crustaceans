@@ -36,7 +36,13 @@ pub fn spawn_enemy(
 
     let player_count = q_players.iter().len();
 
-    let spawn = random.get_mut().gen_ratio(10 * player_count as u32, 1000);
+    let spawn_scale = if player_count == 1 {
+        1.
+    } else {
+        player_count as f32 * 0.7
+    };
+
+    let spawn = random.get_mut().gen_ratio((10. * spawn_scale) as u32, 1000);
 
     if !spawn {
         return;

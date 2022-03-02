@@ -26,6 +26,7 @@ mod update_debug_window;
 mod update_health_bar;
 mod update_inputs;
 mod update_mouse_info;
+mod update_player_size;
 mod update_position_history;
 mod update_score_window;
 
@@ -54,5 +55,6 @@ pub use update_debug_window::update_debug_window;
 pub use update_health_bar::update_health_bar;
 pub use update_inputs::update_inputs;
 pub use update_mouse_info::update_mouse_info;
+pub use update_player_size::update_player_size;
 pub use update_position_history::update_position_history;
 pub use update_score_window::update_score_window;
