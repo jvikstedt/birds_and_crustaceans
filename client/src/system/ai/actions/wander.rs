@@ -3,12 +3,15 @@ use rand::Rng;
 use shared::message::{Frame, Information};
 
 use crate::{
-    component::{self, Collider, NetworkEntity},
+    component::{self, Collider, Enemy, NetworkEntity},
     resource::Random,
 };
 
 pub fn wander(
-    mut collider_q: Query<(&mut Collider, &NetworkEntity), With<component::ai::actions::Wander>>,
+    mut collider_q: Query<
+        (&mut Collider, &NetworkEntity, &Enemy),
+        With<component::ai::actions::Wander>,
+    >,
     mut random: Local<Random>,
     information: Res<Information>,
     frame: Res<Frame>,
@@ -22,15 +25,15 @@ pub fn wander(
         let n = random.get_mut().gen_range(0..10);
 
         if n == 0 {
-            c.0.vel.x = 1.;
+            c.0.vel.x = c.2.x_speed;
         } else if n == 1 {
-            c.0.vel.x = -1.;
+            c.0.vel.x = -c.2.x_speed;
         }
 
         if n == 3 {
-            c.0.vel.y = 1.;
+            c.0.vel.y = c.2.y_speed;
         } else if n == 4 {
-            c.0.vel.y = -1.;
+            c.0.vel.y = -c.2.y_speed;
         }
     }
 }

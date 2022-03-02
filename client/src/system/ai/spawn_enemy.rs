@@ -13,8 +13,8 @@ use shared::message::{Frame, Information};
 
 use crate::{
     component::{
-        ai, Checksum, Collider, Dynamic, EntityType, Health, HealthBar, NetworkEntity, Player,
-        ScoreReward,
+        ai, Checksum, Collider, Dynamic, Enemy, EnemyType, EntityType, Health, HealthBar,
+        NetworkEntity, Player, ScoreReward,
     },
     resource::{NetworkIdProvider, Random},
     rollback::{Rollback, RollbackIdProvider},
@@ -63,10 +63,10 @@ pub fn spawn_enemy(
 
     let x_pos: f32 = random
         .get_mut()
-        .gen_range(-(window_size.x / 2. + 30.)..(window_size.x / 2. - 30.0));
+        .gen_range((-(window_size.x / 2.) + 60. + 100.)..(window_size.x / 2. - 60.0));
     let y_pos: f32 = random
         .get_mut()
-        .gen_range(-(window_size.y / 2. + 30.)..(window_size.y / 2. - 30.0));
+        .gen_range((-(window_size.y / 2.) + 60.)..(window_size.y / 2. - 60.0));
 
     let health_bar_id = commands
         .spawn()
@@ -120,5 +120,18 @@ pub fn spawn_enemy(
         })
         .insert(Health::new(health, health))
         .insert(ai::actions::Wander)
+        .insert(if is_bird {
+            Enemy {
+                enemy_type: EnemyType::Bird,
+                x_speed: 3.,
+                y_speed: 3.,
+            }
+        } else {
+            Enemy {
+                enemy_type: EnemyType::Crustacean,
+                x_speed: 7.,
+                y_speed: 0.,
+            }
+        })
         .add_child(health_bar_id);
 }

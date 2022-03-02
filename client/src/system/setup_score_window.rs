@@ -18,7 +18,7 @@ pub fn setup_score_window(mut commands: Commands, asset_server: Res<AssetServer>
                 align_self: AlignSelf::FlexEnd,
                 position_type: PositionType::Absolute,
                 position: Rect {
-                    top: Val::Px(5.0),
+                    top: Val::Px(300.0),
                     left: Val::Px(15.0),
                     ..Default::default()
                 },

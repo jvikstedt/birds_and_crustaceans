@@ -88,19 +88,19 @@ pub fn build_map(
         .insert_bundle(SpriteBundle {
             sprite: Sprite {
                 color: Color::rgb(0.5, 0.5, 1.0),
-                custom_size: Some(Vec2::new(30., window_size.y)),
+                custom_size: Some(Vec2::new(15., window_size.y)),
                 ..Default::default()
             },
 
             transform: Transform {
-                translation: [-(window_size.x / 2.), 0., 0.].into(),
+                translation: [-(window_size.x / 2.) + 150., 0., 0.].into(),
                 ..Default::default()
             },
             ..Default::default()
         })
         .insert(Collider {
-            size: Vec2::new(30., window_size.y),
-            pos: Vec2::new(-(window_size.x / 2.), 0.),
+            size: Vec2::new(15., window_size.y),
+            pos: Vec2::new(-(window_size.x / 2.) + 150., 0.),
             vel: Vec2::default(),
         })
         .insert(Solid::default())
