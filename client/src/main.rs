@@ -8,10 +8,10 @@ use component::{Checksum, Collider, Health, PositionHistory};
 use event::CollisionEvent;
 use menu::MenuPlugin;
 use resource::{AudioHandles, FrameInfo, MouseInfo, NetworkIdProvider, Opt, RemoteFrames, Scores};
-use shared::message::{ClientState, Frame, PlayerInput};
+use shared::message::{ClientState, PlayerInput};
 use structopt::StructOpt;
 
-use rollback::{rollback_stage::DEFAULT_UPDATE_FREQUENCY, RollbackApp, RollbackPlugin};
+use rollback::{RollbackApp, RollbackPlugin};
 
 #[cfg(feature = "inspectable")]
 use bevy_inspector_egui::{RegisterInspectable, WorldInspectorParams, WorldInspectorPlugin};
@@ -26,30 +26,23 @@ mod system;
 const STAGE_ROLLBACK_INIT: &str = "rollback_init";
 const STAGE_ROLLBACK_ACTIONS: &str = "rollback_actions";
 const STAGE_ROLLBACK_COLLISION: &str = "rollback_collision";
-const STAGE_ROLLBACK_POST_COLLISION: &str = "rollback_post_collision";
 const STAGE_ROLLBACK_CLEANUP: &str = "rollback_cleanup";
 const STAGE_EVERY_DEFAULT: &str = "every_default";
 
 const SYSTEM_LABEL_COLLISION: &str = "collision";
 const SYSTEM_LABEL_SPAWN: &str = "spawn";
 const SYSTEM_LABEL_SPAWN_PLAYERS: &str = "spawn_players";
+const SYSTEM_LABEL_DESPAWN_PLAYERS: &str = "despawn_players";
 const SYSTEM_LABEL_BUILD_MAP: &str = "build_map";
 
 const SYSTEM_LABEL_UPDATE_INPUTS: &str = "update_inputs";
+const SYSTEM_LABEL_APPLY_INPUTS: &str = "apply_inputs";
 const SYSTEM_LABEL_UPDATE_MOUSE_INFO: &str = "update_mouse_info";
 
 const TIMESTEP_1_PER_SECOND: f64 = 1.;
 
 fn run_if_confirmed(frame_info: ResMut<FrameInfo>) -> ShouldRun {
     if frame_info.confirmed {
-        ShouldRun::Yes
-    } else {
-        ShouldRun::No
-    }
-}
-
-fn run_if_confirmed_per_second(frame_info: ResMut<FrameInfo>, frame: ResMut<Frame>) -> ShouldRun {
-    if frame_info.confirmed && frame.number % DEFAULT_UPDATE_FREQUENCY == 0 {
         ShouldRun::Yes
     } else {
         ShouldRun::No
@@ -125,8 +118,12 @@ fn main() {
                         .label(SYSTEM_LABEL_SPAWN)
                         .with_run_criteria(run_if_confirmed)
                         .with_system(system::spawn_players.label(SYSTEM_LABEL_SPAWN_PLAYERS))
-                        .with_system(system::despawn_players)
-                        .with_system(system::ai::spawn_enemy.after(SYSTEM_LABEL_SPAWN_PLAYERS)),
+                        .with_system(
+                            system::despawn_players
+                                .label(SYSTEM_LABEL_DESPAWN_PLAYERS)
+                                .after(SYSTEM_LABEL_SPAWN_PLAYERS),
+                        )
+                        .with_system(system::ai::spawn_enemy.after(SYSTEM_LABEL_DESPAWN_PLAYERS)),
                 ),
             )
             .with_stage(
@@ -136,8 +133,12 @@ fn main() {
                     .with_system_set(
                         SystemSet::new()
                             .with_system(system::update_inputs.label(SYSTEM_LABEL_UPDATE_INPUTS))
-                            .with_system(system::apply_inputs.after(SYSTEM_LABEL_UPDATE_INPUTS))
-                            .with_system(system::hit.after(SYSTEM_LABEL_UPDATE_INPUTS)),
+                            .with_system(
+                                system::apply_inputs
+                                    .label(SYSTEM_LABEL_APPLY_INPUTS)
+                                    .after(SYSTEM_LABEL_UPDATE_INPUTS),
+                            )
+                            .with_system(system::hit.after(SYSTEM_LABEL_APPLY_INPUTS)),
                     ),
             )
             .with_stage(
@@ -154,12 +155,6 @@ fn main() {
                             .with_system(system::handle_hits)
                             .with_system(system::update_position_history),
                     ),
-            )
-            .with_stage(
-                STAGE_ROLLBACK_POST_COLLISION,
-                SystemStage::parallel().with_system_set(
-                    SystemSet::new().with_run_criteria(run_if_confirmed_per_second),
-                ),
             )
             .with_stage(
                 STAGE_ROLLBACK_CLEANUP,
