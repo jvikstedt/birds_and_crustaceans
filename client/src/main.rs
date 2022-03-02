@@ -36,6 +36,7 @@ const SYSTEM_LABEL_SPAWN_PLAYERS: &str = "spawn_players";
 const SYSTEM_LABEL_BUILD_MAP: &str = "build_map";
 
 const SYSTEM_LABEL_UPDATE_INPUTS: &str = "update_inputs";
+const SYSTEM_LABEL_UPDATE_MOUSE_INFO: &str = "update_mouse_info";
 
 const TIMESTEP_1_PER_SECOND: f64 = 1.;
 
@@ -103,13 +104,16 @@ fn main() {
     )
     .add_system_set(SystemSet::on_update(ClientState::Loading).with_system(system::loading))
     .add_system_set(
-        SystemSet::on_enter(ClientState::InGame).with_system(system::audio::start_background_audio),
+        SystemSet::on_enter(ClientState::InGame)
+            .with_system(system::audio::start_background_audio)
+            .with_system(system::setup_score_window)
+            .with_system(system::setup_cursor),
     )
     .add_system_set(
-        SystemSet::on_enter(ClientState::InGame).with_system(system::setup_score_window),
-    )
-    .add_system_set(
-        SystemSet::on_update(ClientState::InGame).with_system(system::update_score_window),
+        SystemSet::on_update(ClientState::InGame)
+            .with_system(system::update_mouse_info.label(SYSTEM_LABEL_UPDATE_MOUSE_INFO))
+            .with_system(system::move_cursor.after(SYSTEM_LABEL_UPDATE_MOUSE_INFO))
+            .with_system(system::update_score_window),
     )
     .with_input_system(system::input)
     .with_rollback_schedule(
@@ -173,7 +177,6 @@ fn main() {
     .add_system(system::handle_client_events)
     .add_system(system::debug_input)
     .add_system(system::update_health_bar)
-    .add_system(system::update_mouse_info)
     .add_system_set(
         SystemSet::new()
             .with_run_criteria(FixedTimestep::step(TIMESTEP_1_PER_SECOND))

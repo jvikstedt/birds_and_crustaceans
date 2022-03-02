@@ -33,7 +33,7 @@ pub fn spawn_players(
         let myself = information.player_handle == *player_handle;
 
         let width = 29.;
-        let height = 24.;
+        let height = 29.;
 
         let next_id = rip.next_id();
 

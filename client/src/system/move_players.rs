@@ -1,17 +1,17 @@
 use bevy::{
     math::Vec3,
-    prelude::{Query, Res, Transform},
+    prelude::{Query, Res, Transform, With},
 };
 
 use crate::{
-    component::{Collider, PositionHistory},
+    component::{Collider, Dynamic, PositionHistory},
     resource::RenderInfo,
 };
 
 // Move actual player entities Transform component positions to match the collider's position
 // This does not need to be executed deterministically
 pub fn move_players(
-    mut player_query: Query<(&mut Transform, &Collider, Option<&PositionHistory>)>,
+    mut player_query: Query<(&mut Transform, &Collider, Option<&PositionHistory>), With<Dynamic>>,
     render_info: Res<RenderInfo>,
 ) {
     for (mut transform, collider, position_his) in player_query.iter_mut() {
