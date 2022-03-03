@@ -58,6 +58,7 @@ fn main() {
 
     app.insert_resource(WindowDescriptor {
         title: "Birds And Crustaceans - Client".to_string(),
+        canvas: Some("#bevy-canvas".to_string()),
         width: 1024.,
         height: 768.,
         ..Default::default()

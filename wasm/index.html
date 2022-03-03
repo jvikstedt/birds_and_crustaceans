@@ -1,96 +1,167 @@
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <style>
-      body {
-        background: linear-gradient(
-          135deg,
+
+<head>
+  <meta charset="utf-8" />
+  <style>
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(135deg,
           white 0%,
           white 49%,
           black 49%,
           black 51%,
           white 51%,
-          white 100%
-        );
-        background-repeat: repeat;
-        background-size: 20px 20px;
-      }
-      canvas {
-        background-color: white;
-      }
-    </style>
-  </head>
-  <script>
-        // Insert hack to make sound autoplay on Chrome as soon as the user interacts with the tab:
-        // https://developers.google.com/web/updates/2018/11/web-audio-autoplay#moving-forward
+          white 100%);
+      background-repeat: repeat;
+      background-size: 20px 20px;
+    }
 
-        // the following function keeps track of all AudioContexts and resumes them on the first user
-        // interaction with the page. If the function is called and all contexts are already running,
-        // it will remove itself from all event listeners.
-        (function () {
-            // An array of all contexts to resume on the page
-            const audioContextList = [];
+    .card, canvas {
+      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    }
 
-            // An array of various user interaction events we should listen for
-            const userInputEventNames = [
-                "click",
-                "contextmenu",
-                "auxclick",
-                "dblclick",
-                "mousedown",
-                "mouseup",
-                "pointerup",
-                "touchend",
-                "keydown",
-                "keyup",
-            ];
+    .card {
+      width: 700px;
+      background-color: white;
+      margin-top: 10px;
+      padding: 10px;
+      position: relative;
+    }
 
-            // A proxy object to intercept AudioContexts and
-            // add them to the array for tracking and resuming later
-            self.AudioContext = new Proxy(self.AudioContext, {
-                construct(target, args) {
-                    const result = new target(...args);
-                    audioContextList.push(result);
-                    return result;
-                },
-            });
+    canvas {
+      height: 480px;
+      width: 720px;
+    }
 
-            // To resume all AudioContexts being tracked
-            function resumeAllContexts(_event) {
-                let count = 0;
+    body {
+      font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
 
-                audioContextList.forEach((context) => {
-                    if (context.state !== "running") {
-                        context.resume();
-                    } else {
-                        count++;
-                    }
-                });
+    .canvas-wrapper svg {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      margin-top: -19px;
+      margin-left: -19px;
+      z-index: -1;
+    }
 
-                // If all the AudioContexts have now resumed then we unbind all
-                // the event listeners from the page to prevent unnecessary resume attempts
-                // Checking count > 0 ensures that the user interaction happens AFTER the game started up
-                if (count > 0 && count === audioContextList.length) {
-                    userInputEventNames.forEach((eventName) => {
-                        document.removeEventListener(eventName, resumeAllContexts);
-                    });
-                }
-            }
+    .focus-container {
+      width: 720px;
+      position: relative;
+    }
+  </style>
+</head>
 
-            // We bind the resume function for each user interaction
-            // event on the page
-            userInputEventNames.forEach((eventName) => {
-                document.addEventListener(eventName, resumeAllContexts);
-            });
-        })();
-    </script>
-  <script type="module">
-    import init from './target/birds_and_crustaceans.js'
-    init()
+<body>
+  <div class="container">
+    <div class="focus-container">
+      <div class="canvas-wrapper">
+        <div class="under-canvas">
+          <!-- By Sam Herbert (@sherb), for everyone. More @ http://goo.gl/7AJzbL -->
+          <svg width="38" height="38" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient x1="8.042%" y1="0%" x2="65.682%" y2="23.865%" id="a">
+                <stop stop-color="#000" stop-opacity="0" offset="0%" />
+                <stop stop-color="#000" stop-opacity=".631" offset="63.146%" />
+                <stop stop-color="#000" offset="100%" />
+              </linearGradient>
+            </defs>
+            <g fill="none" fill-rule="evenodd">
+              <g transform="translate(1 1)">
+                <path d="M36 18c0-9.94-8.06-18-18-18" id="Oval-2" stroke="url(#a)" stroke-width="2">
+                  <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="0.9s"
+                    repeatCount="indefinite" />
+                </path>
+                <circle fill="#000" cx="36" cy="18" r="1">
+                  <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="0.9s"
+                    repeatCount="indefinite" />
+                </circle>
+              </g>
+            </g>
+          </svg>
+        </div>
+        <canvas id="bevy-canvas">
+        </canvas>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="card">
+      <h2>Birds and crustaceans</h2>
+      <p>Deterministic rollback based networking game made with Bevy engine: <b>If you see blank screen, just try to refresh or wait for wasm file to load. Sometimes server might crash, it should restart itself in 1 minute. Games will last 3 minutes and then game will restart itself<b></p>
+      <p>See code and credits <a href="https://github.com/jvikstedt/birds_and_crustaceans" target="_blank">here</a></p>
+    </div>
+  </div>
+</body>
+<script>
+      // Insert hack to make sound autoplay on Chrome as soon as the user interacts with the tab:
+      // https://developers.google.com/web/updates/2018/11/web-audio-autoplay#moving-forward
+
+      // the following function keeps track of all AudioContexts and resumes them on the first user
+      // interaction with the page. If the function is called and all contexts are already running,
+      // it will remove itself from all event listeners.
+      (function () {
+          // An array of all contexts to resume on the page
+          const audioContextList = [];
+
+          // An array of various user interaction events we should listen for
+          const userInputEventNames = [
+              "click",
+              "contextmenu",
+              "auxclick",
+              "dblclick",
+              "mousedown",
+              "mouseup",
+              "pointerup",
+              "touchend",
+              "keydown",
+              "keyup",
+          ];
+
+          // A proxy object to intercept AudioContexts and
+          // add them to the array for tracking and resuming later
+          self.AudioContext = new Proxy(self.AudioContext, {
+              construct(target, args) {
+                  const result = new target(...args);
+                  audioContextList.push(result);
+                  return result;
+              },
+          });
+
+          // To resume all AudioContexts being tracked
+          function resumeAllContexts(_event) {
+              let count = 0;
+
+              audioContextList.forEach((context) => {
+                  if (context.state !== "running") {
+                      context.resume();
+                  } else {
+                      count++;
+                  }
+              });
+
+              // If all the AudioContexts have now resumed then we unbind all
+              // the event listeners from the page to prevent unnecessary resume attempts
+              // Checking count > 0 ensures that the user interaction happens AFTER the game started up
+              if (count > 0 && count === audioContextList.length) {
+                  userInputEventNames.forEach((eventName) => {
+                      document.removeEventListener(eventName, resumeAllContexts);
+                  });
+              }
+          }
+
+          // We bind the resume function for each user interaction
+          // event on the page
+          userInputEventNames.forEach((eventName) => {
+              document.addEventListener(eventName, resumeAllContexts);
+          });
+      })();
   </script>
-  <body>
-    <h2>Birds and crustaceans</h2>
-    <p>Deterministic rollback based networking game made with Bevy engine: <b>If you see blank screen, just try to refresh or wait for wasm file to load. Sometimes server might crash, it should restart itself in 1 minute. Games will last 3 minutes and then game will restart itself<b></p>
-    <p>See code and credits <a href="https://github.com/jvikstedt/birds_and_crustaceans" target="_blank">here</a></p>
-  </body>
+<script type="module">
+  import init from './target/birds_and_crustaceans.js'
+  init()
+</script>
 </html>
