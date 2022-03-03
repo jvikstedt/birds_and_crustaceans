@@ -17,6 +17,11 @@ impl Frames {
         }
     }
 
+    pub fn reset(&mut self) {
+        self.frames = Vec::new();
+        self.last_confirmed = 0;
+    }
+
     pub fn initialize_frames_untill(&mut self, number: FrameNumber) {
         let frame_idx = (number - self.starts_at) as usize;
 

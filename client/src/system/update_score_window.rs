@@ -11,21 +11,21 @@ pub fn update_score_window(
     scores: Res<Scores>,
     information: Res<Information>,
 ) {
-    let mut text = text_q.get_single_mut().unwrap();
+    if let Ok(mut text) = text_q.get_single_mut() {
+        let mut str: String = String::new();
 
-    let mut str: String = String::new();
+        let mut all_scores = scores.get_scores();
+        all_scores.sort_by_key(|k| k.1);
+        all_scores.reverse();
 
-    let mut all_scores = scores.get_scores();
-    all_scores.sort_by_key(|k| k.1);
-    all_scores.reverse();
-
-    for (handle, score) in all_scores {
-        if information.player_handle == *handle {
-            str.push_str(&format!("\n{}: {}", "You", score));
-        } else {
-            str.push_str(&format!("\n{}: {}", handle, score));
+        for (handle, score) in all_scores {
+            if information.player_handle == *handle {
+                str.push_str(&format!("\n{}: {}", "You", score));
+            } else {
+                str.push_str(&format!("\n{}: {}", handle, score));
+            }
         }
-    }
 
-    text.sections[1].value = str;
+        text.sections[1].value = str;
+    }
 }

@@ -41,7 +41,9 @@ pub fn handle_hits(
                 {
                     health.current -= hit.damage;
 
-                    audio.play(audio_handles.get_audio_handle("click").unwrap());
+                    if !frame_info.disable_sound {
+                        audio.play(audio_handles.get_audio_handle("click").unwrap());
+                    }
 
                     if health.current <= 0 {
                         if let Ok(mut parent_player) = players_q.get_mut(hit.parent) {
@@ -52,10 +54,18 @@ pub fn handle_hits(
                             if let Some(enemy) = enemy {
                                 match enemy.enemy_type {
                                     EnemyType::Crustacean => {
-                                        audio.play(audio_handles.get_audio_handle("frog").unwrap());
+                                        if !frame_info.disable_sound {
+                                            audio.play(
+                                                audio_handles.get_audio_handle("frog").unwrap(),
+                                            );
+                                        }
                                     }
                                     EnemyType::Bird => {
-                                        audio.play(audio_handles.get_audio_handle("bird").unwrap());
+                                        if !frame_info.disable_sound {
+                                            audio.play(
+                                                audio_handles.get_audio_handle("bird").unwrap(),
+                                            );
+                                        }
                                     }
                                 }
                             }
@@ -66,12 +76,12 @@ pub fn handle_hits(
 
                                 if parent_player.1.damage > 30 {
                                     parent_player.1.damage = 30;
-                                } else {
+                                } else if !frame_info.disable_sound {
                                     audio.play(audio_handles.get_audio_handle("powerup").unwrap());
                                 }
                                 if parent_player.1.area > 60 {
                                     parent_player.1.area = 60;
-                                } else {
+                                } else if !frame_info.disable_sound {
                                     audio.play(audio_handles.get_audio_handle("powerup").unwrap());
                                 }
                             }

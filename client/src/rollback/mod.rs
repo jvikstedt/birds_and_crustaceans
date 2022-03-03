@@ -64,6 +64,10 @@ impl RollbackIdProvider {
         self.next_id += 1;
         ret
     }
+
+    pub fn reset(&mut self) {
+        self.next_id = 0;
+    }
 }
 
 pub struct RollbackPlugin {

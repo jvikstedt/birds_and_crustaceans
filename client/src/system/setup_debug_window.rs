@@ -1,6 +1,6 @@
 use bevy::{
     math::Rect,
-    prelude::{AssetServer, Color, Commands, Res, TextBundle, UiCameraBundle},
+    prelude::{AssetServer, Color, Commands, Res, TextBundle},
     text::{Text, TextSection, TextStyle},
     ui::{AlignSelf, Display, PositionType, Style, Val},
 };
@@ -9,8 +9,6 @@ use crate::component::DebugWindow;
 
 pub fn setup_debug_window(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("FiraSans-Bold.ttf");
-
-    commands.spawn_bundle(UiCameraBundle::default());
 
     commands
         .spawn_bundle(TextBundle {

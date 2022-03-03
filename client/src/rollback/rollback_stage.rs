@@ -13,6 +13,8 @@ use crate::resource::{FrameInfo, RemoteFrames, RenderInfo};
 
 use super::{world_snapshot::WorldSnapshot, RollbackDiagnostics};
 
+pub struct StopRollbackStage;
+
 pub struct StartRollbackStage {
     frame: FrameNumber,
 }
@@ -61,10 +63,14 @@ pub(crate) struct RollbackStage {
 
     input_lag: u32,
     send_checksum: bool,
+    first_run: bool,
 }
 
 impl Stage for RollbackStage {
     fn run(&mut self, world: &mut World) {
+        if world.remove_resource::<StopRollbackStage>().is_some() {
+            self.running = false;
+        }
         if !self.running {
             // Loading -system will add StartRollbackStage -resource
             // which will cause this stage to start running
@@ -73,9 +79,12 @@ impl Stage for RollbackStage {
                 self.last_confirmed_frame = 1;
                 self.target_frame = start_rollback_stage.frame;
                 self.running = true;
+                self.first_run = true;
             } else {
                 return;
             }
+        } else {
+            self.first_run = false;
         }
 
         let information_res = world
@@ -241,7 +250,7 @@ impl Stage for RollbackStage {
 
             // Execute the next frame
             world.insert_resource(frame);
-            world.insert_resource(FrameInfo::new(false));
+            world.insert_resource(FrameInfo::new(false, true));
             self.schedule.run_once(world);
             world.remove_resource::<FrameInfo>();
             world.remove_resource::<Frame>();
@@ -289,6 +298,7 @@ impl RollbackStage {
             local_frames: Vec::new(),
             input_lag,
             send_checksum: false,
+            first_run: true,
         }
     }
 
@@ -316,7 +326,7 @@ impl RollbackStage {
         // Execute all new confirmed frames
         for frame in frames {
             world.insert_resource(frame);
-            world.insert_resource(FrameInfo::new(true));
+            world.insert_resource(FrameInfo::new(true, self.first_run));
             self.schedule.run_once(world);
             world.remove_resource::<FrameInfo>();
             world.remove_resource::<Frame>();
@@ -345,6 +355,7 @@ impl RollbackStage {
         self.run_speed = 1.;
         self.local_frames = Vec::new();
         self.send_checksum = false;
+        self.first_run = true;
     }
 
     pub(crate) fn set_update_frequency(&mut self, update_frequency: u32) {

@@ -39,7 +39,7 @@ pub fn spawn_enemy(
     let spawn_scale = if player_count == 1 {
         1.
     } else {
-        player_count as f32 * 0.7
+        player_count as f32 * 0.8
     };
 
     let spawn = random.get_mut().gen_ratio((10. * spawn_scale) as u32, 1000);
@@ -69,10 +69,10 @@ pub fn spawn_enemy(
 
     let x_pos: f32 = random
         .get_mut()
-        .gen_range((-(window_size.x / 2.) + 60. + 100.)..(window_size.x / 2. - 60.0));
+        .gen_range((-(window_size.x / 2.) + 80. + 100.)..(window_size.x / 2. - 80.0));
     let y_pos: f32 = random
         .get_mut()
-        .gen_range((-(window_size.y / 2.) + 60.)..(window_size.y / 2. - 60.0));
+        .gen_range((-(window_size.y / 2.) + 80.)..(window_size.y / 2. - 80.0));
 
     let health_bar_id = commands
         .spawn()
@@ -129,13 +129,13 @@ pub fn spawn_enemy(
         .insert(if is_bird {
             Enemy {
                 enemy_type: EnemyType::Bird,
-                x_speed: 3.,
-                y_speed: 3.,
+                x_speed: 2.5,
+                y_speed: 2.5,
             }
         } else {
             Enemy {
                 enemy_type: EnemyType::Crustacean,
-                x_speed: 7.,
+                x_speed: 5.,
                 y_speed: 0.,
             }
         })

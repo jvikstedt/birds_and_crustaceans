@@ -16,21 +16,28 @@ pub fn handle_client_events(
         while let Some(server_message) = channels.recv::<ServerMessage>() {
             match server_message {
                 ServerMessage::ChangeState(state) => {
-                    app_state.set(state).unwrap();
+                    if let Err(err) = app_state.set(state) {
+                        warn!("{:?}", err);
+                    }
                 }
                 ServerMessage::LoadingStart {
                     start_frame,
                     end_frame,
                 } => {
                     info!("loading start: {} - {}", start_frame, end_frame);
-                    *remote_frames = RemoteFrames::new(start_frame);
-                    app_state.set(ClientState::Loading).unwrap();
+                    remote_frames.loading_start = start_frame;
+                    remote_frames.loading_end = end_frame;
+                    if let Err(err) = app_state.set(ClientState::Loading) {
+                        warn!("{:?}", err);
+                    }
                 }
                 ServerMessage::LoadingEnd {
                     start_frame,
                     end_frame,
                 } => {
                     info!("loading end: {} - {}", start_frame, end_frame);
+                    remote_frames.loading_start = start_frame;
+                    remote_frames.loading_end = end_frame;
                     remote_frames.loading_done = true;
                 }
                 ServerMessage::InitialInformation(information) => {

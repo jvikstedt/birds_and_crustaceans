@@ -5,7 +5,7 @@ use bevy::{
 use bevy_kira_audio::AudioPlugin;
 use bevy_networking_turbulence::{LinkConditionerConfig, NetworkingPlugin};
 use bevy_prototype_lyon::plugin::ShapePlugin;
-use component::{Checksum, Collider, Health, Player, PositionHistory};
+use component::{Checksum, Collider, Health, Keep, Player, PositionHistory};
 use event::CollisionEvent;
 use menu::MenuPlugin;
 use resource::{AudioHandles, FrameInfo, MouseInfo, NetworkIdProvider, Opt, RemoteFrames, Scores};
@@ -39,6 +39,7 @@ const SYSTEM_LABEL_BUILD_MAP: &str = "build_map";
 const SYSTEM_LABEL_UPDATE_INPUTS: &str = "update_inputs";
 const SYSTEM_LABEL_APPLY_INPUTS: &str = "apply_inputs";
 const SYSTEM_LABEL_UPDATE_MOUSE_INFO: &str = "update_mouse_info";
+const SYSTEM_LABEL_RESET_SESSION: &str = "reset_session";
 
 const TIMESTEP_1_PER_SECOND: f64 = 1.;
 
@@ -90,20 +91,26 @@ fn main() {
     })
     .add_plugin(FrameTimeDiagnosticsPlugin::default())
     .add_state(ClientState::MainMenu)
-    .add_startup_system(system::setup_debug_window)
     .add_startup_system(shared::system::setup_network)
+    .add_startup_system(system::audio::setup_audio_handles)
+    .add_startup_system(setup_cameras)
     .add_system_set(SystemSet::on_enter(ClientState::Connecting).with_system(system::setup_client))
     .add_system_set(
         SystemSet::on_enter(ClientState::Loading)
-            .with_system(system::audio::setup_audio_handles)
-            .with_system(system::build_map.label(SYSTEM_LABEL_BUILD_MAP)),
+            .with_system(system::reset_session.label(SYSTEM_LABEL_RESET_SESSION))
+            .with_system(system::setup_score_window.after(SYSTEM_LABEL_RESET_SESSION))
+            .with_system(system::setup_stats_window.after(SYSTEM_LABEL_RESET_SESSION))
+            .with_system(system::setup_debug_window.after(SYSTEM_LABEL_RESET_SESSION))
+            .with_system(
+                system::build_map
+                    .label(SYSTEM_LABEL_BUILD_MAP)
+                    .after(SYSTEM_LABEL_RESET_SESSION),
+            ),
     )
     .add_system_set(SystemSet::on_update(ClientState::Loading).with_system(system::loading))
     .add_system_set(
         SystemSet::on_enter(ClientState::InGame)
             .with_system(system::audio::start_background_audio)
-            .with_system(system::setup_score_window)
-            .with_system(system::setup_stats_window)
             .with_system(system::setup_cursor),
     )
     .add_system_set(
@@ -199,4 +206,15 @@ fn main() {
         .register_inspectable::<component::Collider>();
 
     app.run();
+}
+
+fn setup_cameras(mut commands: Commands) {
+    commands
+        .spawn()
+        .insert_bundle(OrthographicCameraBundle::new_2d())
+        .insert(Keep);
+
+    commands
+        .spawn_bundle(UiCameraBundle::default())
+        .insert(Keep::default());
 }

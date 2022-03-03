@@ -10,6 +10,10 @@ pub fn loading(
     mut remote_frames: ResMut<RemoteFrames>,
     mut client_res: ResMut<NetworkResource>,
 ) {
+    if remote_frames.loading_done {
+        let loading_end = remote_frames.loading_end;
+        remote_frames.tmp_frames.retain(|f| f.number <= loading_end);
+    }
     // Sort tmp_frames
     remote_frames.tmp_frames.sort_by_key(|f| f.number);
 

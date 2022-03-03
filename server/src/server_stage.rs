@@ -1,11 +1,13 @@
 #![allow(dead_code)]
 
+use std::collections::HashMap;
+
 use bevy::prelude::*;
 use bevy_networking_turbulence::{ConnectionHandle, NetworkResource};
 use instant::{Duration, Instant};
 use shared::{
     message::{FrameInfo, ServerMessage},
-    FrameNumber,
+    FrameDiff, FrameNumber, PlayerHandle, GAME_LENGTH,
 };
 
 use crate::resource::{Frames, Players};
@@ -160,6 +162,44 @@ impl Stage for ServerStage {
 
             // Move to next frame
             self.current_frame += 1;
+
+            // Reset world
+            if self.current_frame >= GAME_LENGTH {
+                let mut server_res = world
+                    .get_resource_mut::<NetworkResource>()
+                    .expect("ServerResource exists");
+
+                server_res.broadcast_message(ServerMessage::LoadingStart {
+                    start_frame: 1,
+                    end_frame: 1,
+                });
+
+                self.reset_session();
+
+                let mut players = world.get_resource_mut::<Players>().expect("Players exists");
+
+                let mut player_handles: Vec<PlayerHandle> = Vec::new();
+                for (_, mut v) in players.0.iter_mut() {
+                    v.loading = true;
+                    v.last_sent = 0;
+                    v.frame_diff = FrameDiff::default();
+                    v.last_confirmed_frame = 0;
+                    v.checksums = HashMap::new();
+
+                    player_handles.push(v.handle);
+                }
+
+                let mut frames = world.get_resource_mut::<Frames>().expect("Frames exists");
+                frames.reset();
+
+                let next_frame = frames.last_confirmed + 1;
+                frames.initialize_frames_untill(next_frame);
+                let frame = frames.get_mut(next_frame);
+
+                for handle in player_handles {
+                    frame.joined_players.push(handle);
+                }
+            }
         }
     }
 }

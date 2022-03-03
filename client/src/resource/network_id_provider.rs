@@ -16,4 +16,8 @@ impl NetworkIdProvider {
         self.next_id += 1;
         ret
     }
+
+    pub fn reset(&mut self) {
+        self.next_id = 0;
+    }
 }

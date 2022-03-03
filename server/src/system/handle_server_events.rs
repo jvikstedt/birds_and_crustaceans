@@ -25,6 +25,11 @@ pub fn handle_server_events(
                 }
             };
 
+            if tick_input.last_confirmed_frame > frames.last_confirmed {
+                warn!("WARNING: received last_confirmed_frame higher than server confirmed frame {:?}", tick_input.last_confirmed_frame);
+                continue;
+            }
+
             // Update player info
             if tick_input.last_confirmed_frame > player_info.last_confirmed_frame {
                 player_info.last_confirmed_frame = tick_input.last_confirmed_frame;
