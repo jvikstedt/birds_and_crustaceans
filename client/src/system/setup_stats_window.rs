@@ -33,7 +33,7 @@ pub fn setup_stats_window(mut commands: Commands, asset_server: Res<AssetServer>
                         },
                     },
                     TextSection {
-                        value: "".to_string(),
+                        value: "GAME IS LOADING...".to_string(),
                         style: TextStyle {
                             font: font.clone(),
                             font_size: 12.,
