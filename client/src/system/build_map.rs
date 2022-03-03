@@ -190,10 +190,10 @@ pub fn build_map(
         .insert(NetworkEntity { id: nip.next_id() })
         .insert(Rollback::new(rip.next_id()))
         .insert(Checksum::default())
-        .insert(Health::new(500, 500))
+        .insert(Health::new(700, 700))
         .insert(Training {
-            area_increase: 0,
-            damage_increase: 5,
+            area_increase: 2,
+            damage_increase: 2,
         })
         .add_child(health_bar_id);
 
@@ -242,7 +242,7 @@ pub fn build_map(
         .insert(Health::new(500, 500))
         .insert(Training {
             area_increase: 0,
-            damage_increase: 5,
+            damage_increase: 3,
         })
         .add_child(health_bar_id);
 
@@ -290,7 +290,7 @@ pub fn build_map(
         .insert(NetworkEntity { id: nip.next_id() })
         .insert(Rollback::new(rip.next_id()))
         .insert(Checksum::default())
-        .insert(Health::new(500, 500))
+        .insert(Health::new(700, 700))
         .insert(Training {
             area_increase: 3,
             damage_increase: 0,
@@ -346,7 +346,7 @@ pub fn build_map(
         .insert(Checksum::default())
         .insert(Health::new(500, 500))
         .insert(Training {
-            area_increase: 3,
+            area_increase: 2,
             damage_increase: 0,
         })
         .add_child(health_bar_id);

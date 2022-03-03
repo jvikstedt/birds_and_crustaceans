@@ -1,4 +1,9 @@
+use crate::{
+    component::{Enemy, EnemyType},
+    resource::AudioHandles,
+};
 use bevy::prelude::{Entity, EventReader, Query, Res, ResMut};
+use bevy_kira_audio::Audio;
 
 use crate::{
     component::{EntityType, Health, Hit, Player, ScoreReward, Training},
@@ -9,10 +14,18 @@ use crate::{
 pub fn handle_hits(
     mut collision_ev: EventReader<CollisionEvent>,
     frame_info: Res<FrameInfo>,
-    mut health_q: Query<(Entity, &mut Health, Option<&ScoreReward>, Option<&Training>)>,
+    mut health_q: Query<(
+        Entity,
+        &mut Health,
+        Option<&Enemy>,
+        Option<&ScoreReward>,
+        Option<&Training>,
+    )>,
     melee_hit_q: Query<(Entity, &Hit)>,
     mut scores: ResMut<Scores>,
     mut players_q: Query<(Entity, &mut Player)>,
+    audio: Res<Audio>,
+    audio_handles: Res<AudioHandles>,
 ) {
     if frame_info.confirmed {
         for c in collision_ev.iter() {
@@ -23,13 +36,28 @@ pub fn handle_hits(
                     continue;
                 }
 
-                if let Ok((_, mut health, score_reward, training)) = health_q.get_mut(c.target) {
+                if let Ok((_, mut health, enemy, score_reward, training)) =
+                    health_q.get_mut(c.target)
+                {
                     health.current -= hit.damage;
+
+                    audio.play(audio_handles.get_audio_handle("click").unwrap());
 
                     if health.current <= 0 {
                         if let Ok(mut parent_player) = players_q.get_mut(hit.parent) {
                             if let Some(score_reward) = score_reward {
                                 scores.add_score(parent_player.1.handle, score_reward.score);
+                            }
+
+                            if let Some(enemy) = enemy {
+                                match enemy.enemy_type {
+                                    EnemyType::Crustacean => {
+                                        audio.play(audio_handles.get_audio_handle("frog").unwrap());
+                                    }
+                                    EnemyType::Bird => {
+                                        audio.play(audio_handles.get_audio_handle("bird").unwrap());
+                                    }
+                                }
                             }
 
                             if let Some(training) = training {
@@ -38,9 +66,13 @@ pub fn handle_hits(
 
                                 if parent_player.1.damage > 30 {
                                     parent_player.1.damage = 30;
+                                } else {
+                                    audio.play(audio_handles.get_audio_handle("powerup").unwrap());
                                 }
                                 if parent_player.1.area > 60 {
                                     parent_player.1.area = 60;
+                                } else {
+                                    audio.play(audio_handles.get_audio_handle("powerup").unwrap());
                                 }
                             }
                         }
