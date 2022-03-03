@@ -9,4 +9,4 @@ pub type FrameNumber = u32;
 
 pub const SERVER_PORT: u16 = 14191;
 
-pub const GAME_LENGTH: FrameNumber = 30 * 120;
+pub const GAME_LENGTH: FrameNumber = 30 * 3 * 60;
