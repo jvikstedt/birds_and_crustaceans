@@ -103,13 +103,15 @@ fn main() {
         SystemSet::on_enter(ClientState::InGame)
             .with_system(system::audio::start_background_audio)
             .with_system(system::setup_score_window)
+            .with_system(system::setup_stats_window)
             .with_system(system::setup_cursor),
     )
     .add_system_set(
         SystemSet::on_update(ClientState::InGame)
             .with_system(system::update_mouse_info.label(SYSTEM_LABEL_UPDATE_MOUSE_INFO))
             .with_system(system::move_cursor.after(SYSTEM_LABEL_UPDATE_MOUSE_INFO))
-            .with_system(system::update_score_window),
+            .with_system(system::update_score_window)
+            .with_system(system::update_stats_window),
     )
     .with_input_system(system::input)
     .with_rollback_schedule(

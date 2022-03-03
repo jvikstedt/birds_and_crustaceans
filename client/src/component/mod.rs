@@ -18,6 +18,7 @@ mod position_history;
 mod score_reward;
 mod score_window;
 mod solid;
+mod stats_window;
 mod training;
 
 pub use checksum::Checksum;
@@ -38,4 +39,5 @@ pub use position_history::PositionHistory;
 pub use score_reward::ScoreReward;
 pub use score_window::ScoreWindow;
 pub use solid::Solid;
+pub use stats_window::StatsWindow;
 pub use training::Training;
